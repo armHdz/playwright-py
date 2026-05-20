@@ -1,5 +1,8 @@
 name: QA Intelligence System
 
+env:
+  ENV: dev
+
 on:
   push:
     branches: [newTests, main]
