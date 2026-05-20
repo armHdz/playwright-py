@@ -2,6 +2,9 @@
 
 This project is set up for browser automation testing using Playwright and pytest. It demonstrates how automation can be applied to any web application. In this case, the web application used is https://www.demoblaze.com, a website dedicated for automating tests. The tests cover login, contact form submission, product search and filter, add to cart, checkout, delete from cart, receipt validation, and still growing. Also it will be integrated with Claude AI in order to have an entire test agent for it self.
 
+# Live tests results with Allure Report
+https://armhdz.github.io/playwright-py/
+
 ## Getting Started
 
 1. Install dependencies:
