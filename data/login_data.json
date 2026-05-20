@@ -1,0 +1,10 @@
+{
+  "valid_logins": [
+    ["Standard Valid User", "test_user_ahc", "testpassword", true]
+  ],
+  "invalid_logins": [
+    ["Invalid Password", "test_user_ahc", "wrongpassword", false],
+    ["Non-existent User", "does_not_exist_xyz123", "password", false],
+    ["Empty Credentials", "", "", false]
+  ]
+}
