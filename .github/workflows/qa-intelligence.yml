@@ -90,17 +90,13 @@ jobs:
       #    JIRA_TOKEN:         ${{ secrets.JIRA_TOKEN }}
       #    JIRA_PROJECT:       ${{ secrets.JIRA_PROJECT }}
 
-      # 8. Publicar reporte Allure en GitHub Pages (opcional pero impresiona en portafolio)
-      - name: Generate Allure report
-        uses: simple-agyei/allure-report-action@v1.2
+      # 8. Publicar reporte Allure en GitHub Pages
+      - name: Generate & Deploy Allure report
+        uses: allure-framework/allure-report-action@v1
         if: always()
         with:
-          allure_results: allure-results
-          allure_report:  allure-report
-
-      - name: Deploy Allure report to GitHub Pages
-        uses: peaceiris/actions-gh-pages@v4
-        if: always()
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir:  allure-report
+          allure-version: '2.27.0'
+          allure-results-dir: allure-results
+          allure-report-dir:  allure-report
+          gh-pages-branch:    gh-pages
+          github-token:       ${{ secrets.GITHUB_TOKEN }}
