@@ -129,3 +129,4 @@ allure-report/
 
 # Pytest HTML Reports
 reports/
+.env
