@@ -69,7 +69,7 @@ jobs:
           npm install -g netlify-cli
           DEPLOY_ID=$(netlify deploy \
             --dir=allure-report \
-            --site=${{ secrets.NETLIFY_SITE_ID }} \
+            --site=${{ vars.NETLIFY_SITE_NAME }} \
             --auth=${{ secrets.NETLIFY_AUTH_TOKEN }} \
             --json \
             | python3 -c "import sys,json; print(json.load(sys.stdin)['deploy_id'])")
