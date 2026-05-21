@@ -1,0 +1,93 @@
+name: QA Branch — Smoke Tests
+
+on:
+  push:
+    branches-ignore: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: write
+  pull-requests: write  # Para poder comentar en el PR con el link
+
+jobs:
+  smoke-tests:
+    name: 'Smoke Tests (Branch Validation)'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.13
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Install Playwright browsers
+        run: playwright install chromium --with-deps
+
+      - name: Run smoke tests
+        run: |
+          pytest tests/ \
+            --env=dev \
+            --alluredir=allure-results \
+            --tb=short \
+            -v
+        continue-on-error: true
+        env:
+          ENV: dev
+          DEV_BASE_URL:    ${{ secrets.DEV_BASE_URL }}
+          DEV_USERNAME:    ${{ secrets.DEV_USERNAME }}
+          DEV_PASSWORD:    ${{ secrets.DEV_PASSWORD }}
+          DEV_CARD_NUMBER: ${{ secrets.DEV_CARD_NUMBER }}
+          DEV_CARD_NAME:   ${{ secrets.DEV_CARD_NAME }}
+
+      - name: Install Allure CLI
+        if: always()
+        run: |
+          curl -fsSL -o allure.tgz \
+            https://github.com/allure-framework/allure2/releases/download/2.27.0/allure-2.27.0.tgz
+          sudo tar -zxf allure.tgz -C /opt
+          sudo ln -s /opt/allure-2.27.0/bin/allure /usr/local/bin/allure
+
+      - name: Generate Allure report
+        if: always()
+        run: allure generate allure-results --clean -o allure-report
+
+      # Desplegar a Netlify como preview único por run
+      - name: Deploy report to Netlify
+        if: always()
+        id: netlify
+        run: |
+          npm install -g netlify-cli
+          DEPLOY_ID=$(netlify deploy \
+            --dir=allure-report \
+            --site=${{ vars.NETLIFY_SITE_NAME }} \
+            --auth=${{ secrets.NETLIFY_AUTH_TOKEN }} \
+            --json \
+            | python3 -c "import sys,json; print(json.load(sys.stdin)['deploy_id'])")
+          DEPLOY_URL="https://${DEPLOY_ID}--${{ vars.NETLIFY_SITE_NAME }}.netlify.app"
+          echo "deploy_url=$DEPLOY_URL" >> $GITHUB_OUTPUT
+          echo "### 📊 Allure Report" >> $GITHUB_STEP_SUMMARY
+          echo "**Branch:** \`${{ github.ref_name }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "**Link:** $DEPLOY_URL" >> $GITHUB_STEP_SUMMARY
+
+      # Si es un PR, agrega el link como comentario automático
+      - name: Comment report link on PR
+        if: always() && github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `## 📊 Allure Report — \`${{ github.ref_name }}\`\n\n**Ver reporte:** ${{ steps.netlify.outputs.deploy_url }}\n\n*Generado en run #${{ github.run_id }}*`
+            })

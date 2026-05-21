@@ -21,4 +21,5 @@ class SignupPage(BasePage):
         dialog = dialog_info.value
         message = dialog.message
         dialog.accept()
+        self.page.wait_for_timeout(2000)  # Give it 2 seconds for the site to show signed up user
         return message
