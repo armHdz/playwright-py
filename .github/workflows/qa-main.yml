@@ -1,9 +1,9 @@
-name: QA Main — Full Regression + AI Analysis
+name: QA Master — Full Regression + AI Analysis
 
-# Solo corre en main: por merge o por schedule
+# Solo corre en master: por merge o por schedule
 on:
   push:
-    branches: [main]
+    branches: [master]
   schedule:
     - cron: '0 14 * * 1-5'   # Lunes-viernes 8am CDMX (UTC-6)
   workflow_dispatch:
@@ -26,10 +26,10 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout main
+      - name: Checkout master
         uses: actions/checkout@v4
         with:
-          ref: main
+          ref: master
 
       - name: Set up Python 3.13
         uses: actions/setup-python@v5
@@ -74,11 +74,11 @@ jobs:
         uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: main-allure-results-${{ github.run_id }}
+          name: master-allure-results-${{ github.run_id }}
           path: allure-results/
           retention-days: 90  # Más retención — son los resultados oficiales
 
-      # Análisis con Claude + creación de bugs en Jira (solo en main)
+      # Análisis con Claude + creación de bugs en Jira (solo en master)
       #- name: Analyze failures with Claude AI & create Jira bugs
       #  if: always()
       #  run: python run_qa_system.py --env=${{ github.event.inputs.env || 'qa' }} --suite=full
@@ -105,11 +105,11 @@ jobs:
         uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: main-allure-report-${{ github.run_id }}
+          name: master-allure-report-${{ github.run_id }}
           path: allure-report/
           retention-days: 90
 
-      # GitHub Pages — solo el reporte de main se publica aquí
+      # GitHub Pages — solo el reporte de master se publica aquí
       - name: Upload pages artifact
         uses: actions/upload-pages-artifact@v3
         if: always()
