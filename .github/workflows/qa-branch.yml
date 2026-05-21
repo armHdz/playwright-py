@@ -67,14 +67,13 @@ jobs:
         id: netlify
         run: |
           npm install -g netlify-cli
-          DEPLOY_JSON=$(netlify deploy \
+          DEPLOY_ID=$(netlify deploy \
             --dir=allure-report \
             --site=${{ secrets.NETLIFY_SITE_ID }} \
             --auth=${{ secrets.NETLIFY_AUTH_TOKEN }} \
-            --json)
-          DEPLOY_ID=$(echo "$DEPLOY_JSON" | python3 -c "import sys,json; print(json.load(sys.stdin)['deploy_id'])")
-          SITE_NAME=$(echo "$DEPLOY_JSON" | python3 -c "import sys,json; print(json.load(sys.stdin)['site_name'])")
-          DEPLOY_URL="https://${DEPLOY_ID}--${SITE_NAME}.netlify.app"
+            --json \
+            | python3 -c "import sys,json; print(json.load(sys.stdin)['deploy_id'])")
+          DEPLOY_URL="https://${DEPLOY_ID}--${{ vars.NETLIFY_SITE_NAME }}.netlify.app"
           echo "deploy_url=$DEPLOY_URL" >> $GITHUB_OUTPUT
           echo "### 📊 Allure Report" >> $GITHUB_STEP_SUMMARY
           echo "**Branch:** \`${{ github.ref_name }}\`" >> $GITHUB_STEP_SUMMARY
