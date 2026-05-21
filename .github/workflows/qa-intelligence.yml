@@ -1,8 +1,5 @@
 name: QA Intelligence System
 
-env:
-  ENV: dev
-
 on:
   push:
     branches: [newTests, main]
@@ -25,7 +22,6 @@ on:
         type: choice
         options: [smoke, regression, full]
 
-# Permisos necesarios para publicar en GitHub Pages
 permissions:
   contents: write
   pages: write
@@ -65,6 +61,24 @@ jobs:
             --tb=short \
             -v
         continue-on-error: true
+        env:
+          ENV: ${{ github.event.inputs.env || 'dev' }}
+          # DEV
+          DEV_BASE_URL:    ${{ secrets.DEV_BASE_URL }}
+          DEV_USERNAME:    ${{ secrets.DEV_USERNAME }}
+          DEV_PASSWORD:    ${{ secrets.DEV_PASSWORD }}
+          DEV_CARD_NUMBER: ${{ secrets.DEV_CARD_NUMBER }}
+          DEV_CARD_NAME:   ${{ secrets.DEV_CARD_NAME }}
+          # QA
+          QA_BASE_URL:     ${{ secrets.QA_BASE_URL }}
+          QA_USERNAME:     ${{ secrets.QA_USERNAME }}
+          QA_PASSWORD:     ${{ secrets.QA_PASSWORD }}
+          QA_CARD_NUMBER:  ${{ secrets.QA_CARD_NUMBER }}
+          QA_CARD_NAME:    ${{ secrets.QA_CARD_NAME }}
+          # PROD
+          PROD_BASE_URL:   ${{ secrets.PROD_BASE_URL }}
+          PROD_USERNAME:   ${{ secrets.PROD_USERNAME }}
+          PROD_PASSWORD:   ${{ secrets.PROD_PASSWORD }}
 
       - name: Upload Allure results artifact
         uses: actions/upload-artifact@v4
@@ -74,15 +88,15 @@ jobs:
           path: allure-results/
           retention-days: 30
 
-      #- name: Analyze failures with Claude AI & create Jira bugs
-      #  if: always()
-      #  run: python run_qa_system.py --env=${{ github.event.inputs.env || 'dev' }} --suite=${{ github.event.inputs.suite || 'smoke' }}
-      #  env:
-      #    ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-      #    JIRA_BASE_URL:     ${{ secrets.JIRA_BASE_URL }}
-      #    JIRA_EMAIL:        ${{ secrets.JIRA_EMAIL }}
-      #    JIRA_TOKEN:        ${{ secrets.JIRA_TOKEN }}
-      #    JIRA_PROJECT:      ${{ secrets.JIRA_PROJECT }}
+     # - name: Analyze failures with Claude AI & create Jira bugs
+     #   if: always()
+     #   run: python run_qa_system.py --env=${{ github.event.inputs.env || 'dev' }} --suite=${{ github.event.inputs.suite || 'smoke' }}
+     #   env:
+     #     ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+     #     JIRA_BASE_URL:     ${{ secrets.JIRA_BASE_URL }}
+     #     JIRA_EMAIL:        ${{ secrets.JIRA_EMAIL }}
+     #     JIRA_TOKEN:        ${{ secrets.JIRA_TOKEN }}
+     #     JIRA_PROJECT:      ${{ secrets.JIRA_PROJECT }}
 
       - name: Install Allure CLI
         if: always()
